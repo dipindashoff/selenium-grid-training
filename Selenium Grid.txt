@@ -1,0 +1,224 @@
+ADVANTAGES OF USING SELENIUM GRID:
+--Split test case runs across machines:
+	--> 1 hub + many nodes
+	- Tests run in Hub machine i.e code is present inly in Hub machine.
+	- Execution in Nodes
+
+--Cross Browser Testing:
+	- Machine 1: Win 10 + IE 11
+	- Machine 1: Mac + Safari
+	- Machine 1: Ubuntu 10 + Firefox
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------------
+																		THEORY
+---------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+																	---> Node1
+																	---> Node2
+															HUB		---> Node3
+																	---> Node4
+																	---> Node5
+
+1) How to setup Hub?
+ Run selenium grid jar file hub machine.
+ Syntax:
+   java -jar <location of your Selenium server.jar file> -role hub
+
+2) How to link Node to Hub?
+ java -Dwebdriver.chrome.driver=/home/dipin-ubuntu/Downloads/chromedriver -jar selenium-server-standalone-3.141.59.jar -role node -hub http://<IP of HUB m/c>:4444/grid/register/ -port 5557
+ 
+3) How are scripts in Hub run in Node machines? How does Hub pick the right Node machine to run scripts?
+ Remote web driver is used to execute your program in a VM. All requests are sent to Hub via RemoteWebDriver. Hub passes these requests to the Node machines. Each Node is identified by its OS & browser names. Hub identifies the right Node machine by reading the OS & browser names of that Node from its desired capabilities.
+ 
+ Usually to launch a browser in local machine, I need to do 3 things:
+  - Point to chromedriver.exe
+  - Set DesiredCapabilities/ChromeOptions
+  - Instantiate driver
+ Remote web driver is used to execute your program in a VM.
+ Now I have to do it on a RemoteDriver as follows:
+	// 1. Set Node identifications params i.e OS & Browser
+	DesiredCapabilities cap = new DesiredCapabilities();
+	cap.setBrowserName("chrome");
+	cap.setPlatform(Platform.LINUX);
+	// Chrome option
+	ChromeOptions options = new ChromeOptions();
+	options.merge(cap);
+	
+	// 2. Send the requests to Hub along with the info to pick the right Node machine
+	driver = new RemoteWebDriver(new URL(hubURL), options);
+	
+	// 3. Write Tests using this driver variable to run tests in Node machines.
+
+4) How to setup multiple nodes?
+	If you want to create more nodes, from the node machine, 
+	 - Download Selenium Grid jar file.
+	 - Download browser server.exe file for that OS.
+	 - Use same command as above to register this node to the Hub but with a different port number.
+ 
+--------------------------------------------------------------------------------------------------------------------------------------------------------------- 
+															SETUP VIRTUAL MACHINE WITH UBUNTU OS
+---------------------------------------------------------------------------------------------------------------------------------------------------------------
+ PREREQUISITES:
+  Download VMware Workstation 15 Player.
+  Download Ubuntu.
+
+ Enable Intel VT-X Virtualization:
+  Go to Settings> Update & Security>Recovery and click on Restart Now under Advanced Start-up.
+  While restarting your computer, choose Troubleshoot>Advanced option>UEFI Firmware settings>click Restart.
+  On the boot menu, navigate to Advanced options/Configuration and find out Intel Virtual Technology and enable it by pressing F6.
+ 
+  To enter BIOS Mode for HP:
+   Most commonly: F10 or ESC.
+   Alternatively: F1, F2, F6, or F11
+   On HP Tablet PCs:  F10 or F12
+
+ (AND/OR)
+  -Turn ON the System
+  -Repeatedly press Esc key at startup.
+  -Press the F10 key for BIOS Setup.
+  -Press the right arrow key to System Configuration tab, Select Virtualization Technology and then press the Enter key.
+  -Select Enabled and press the Enter key.
+  -Press the F10 key and select Yes and press the Enter key to save changes and Reboot.
+
+How to run Ubuntu in VMware Workstation:
+ https://www.youtube.com/watch?v=9rUhGWijf9U
+ 
+  Install OpenJDK 8 in Ubuntu:
+	Open terminal CTRL + ALT + T. Enter the command to install JDK.
+	$ sudo apt install openjdk-8-jdk
+ 
+  Refer:
+	https://linuxize.com/post/install-java-on-ubuntu-20-04/
+ 
+  Install Notepad++ in Ubuntu:
+	From Ubuntu Software Center.
+ 
+---------------------------------------------------------------------------------------------------------------------------------------------------------------
+																HUB & NODE CONFIGURATIONS
+---------------------------------------------------------------------------------------------------------------------------------------------------------------
+SETUP HUB:
+1. Go to Hub machine. Download Selenium Server standalone i.e Selenium Server (Grid) from https://www.selenium.dev/downloads/
+2. Setup Hub
+
+   Syntax:
+   java -jar <location of your Selenium server.jar file> -role hub
+   
+   You can add all hub configurations in a JSON in the same location as the selenium grid jar file.
+   Open Git Bash.
+   
+   // With Hub Configurations in hubconfig.json
+   $ java -jar selenium-server-standalone-3.141.59.jar -role hub -hubConfig hubconfig.json
+   
+   CONSOLE OUTPUT:
+   Launching Selenium Grid hub on port 4444
+   Selenium Grid hub is up and running
+   Nodes should register to http://192.168.150.1:4444/grid/register/
+   Clients should connect to http://192.168.150.1:4444/wd/hub
+ 
+   To verify that Hub has started, open browser & type http://localhost:4444/ --> Click <console>
+ 
+REGISTER HUB & NODE:
+1. Go to Node machine. Download Selenium Server standalone i.e Selenium Server (Grid) from https://www.selenium.dev/downloads/ 
+2. Setup Node
+   // Set the Hub as your Node   
+   java -Dwebdriver.chrome.driver=<file path of your chromedriver.exe> -jar <file path of your selenium standalone jar file> -role node -hub <url of your hub with port number>
+   
+   Example:
+   //  Nodes should register to http://192.168.0.103:4444/grid/register/   
+   java -Dwebdriver.chrome.driver=/home/dipin-ubuntu/Downloads/chromedriver -jar selenium-server-standalone-3.141.59.jar -role node -hub http://192.168.150.1:4444/grid/register/ -port 5557
+   
+   CONSOLE OUTPUT:
+   Registering the node to the hub: http://192.168.0.103:4444/grid/register
+   The node is registered to the hub and ready to use
+   
+   **Press CTRL + C to stop the session.
+  
+  NOTES:
+  1. System.setProperty("webdriver.chrome.driver", "chromedriver.exe"); --> java -Dwebdriver.chrome.driver=<file path of your chromedriver.exe>.
+  2. Advance command for specific instance:
+	java -jar selenium-server-standalone-2.47.1.jar -role node –hub <hub hostname>/grid/register -browser "browserName=internet explorer,version=11,maxinstance=1, platform=WINDOWS" –port 5656
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------------
+																	CODING
+---------------------------------------------------------------------------------------------------------------------------------------------------------------
+EXPLANATION:
+Whenever you want to run your code on different machines using selenium grid you want to create the object of desired capabilities.
+ DesiredCapabilities cap=new DesiredCapabilities();
+If you want to define any capabilities you can define them using the object of desired capabilities.
+ cap.setBrowserName(“chrome”);
+ cap.setPlatform(Platform.WINDOWS);
+Next you need to create chrome option class.
+ ChromeOptions op = new ChromeOptions();
+If you like run your test in headless mode you can insert that to the chromeoptions.
+ options.setHeadless(true);
+You need to merger desired capabilities with the chrome options.
+ options.merge(cap);
+Then you need to define one string variable to locate where exactly your hub is running.
+ String huburl =”http://172.18.132.145:4444/wd/hub";
+Instead of writing WebDriver driver=new ChromeDriver, you need to write:
+ WebDriver driver=new RemoteWebDriver(new URL(huburl), options);
+To the RemoteWebDriver you need to pass where exactly your hub is running <new URL(huburl)> along with the chrome options. 
+-->Before running your test case make sure both your hub and the node are up and running. 
+
+CODE:
+public class ChromeGridTest {
+
+	public static void main(String[] args) throws MalformedURLException {		
+		
+		// Define desired capabilities
+		DesiredCapabilities cap=new DesiredCapabilities();
+		cap.setBrowserName("chrome");
+		cap.setPlatform(Platform.LINUX);
+		
+		// Chrome option  
+		ChromeOptions options = new ChromeOptions();
+		options.merge(cap);
+		options.setHeadless(true);
+		
+		// Hub URL
+		// Clients should connect to http://192.168.0.103:4444/wd/hub
+		String huburl ="http://192.168.150.1:4444/wd/hub";
+		 
+		// Create driver with hub address and capability
+		WebDriver driver=new RemoteWebDriver(new URL(huburl), options);
+		 
+		// Test case
+		driver.get("https://www.findmyfare.com/");		 
+		System.out.println("Title is "+driver.getTitle());
+		
+		// Close driver
+		driver.close();
+	}
+}
+
+SELENIUM GRID CONFIGURATION USING JSON:
+---------------------------------------
+ Selenium has an in built JSON config file that can be used to set up selenium grid.
+ 
+Configure HUB using JSON:
+ Copy the contents below into a json file: hubconfig.json, in Hub machine.
+ NOTE: Selenium stand alone jar file and the json file must be present on the same directory.
+
+{
+  "port": 4444,
+  "newSessionWaitTimeout": -1,
+  "servlets" : [],
+  "withoutServlets": [],
+  "custom": {},
+  "capabilityMatcher": "org.openqa.grid.internal.utils.DefaultCapabilityMatcher",
+  "registry": "org.openqa.grid.internal.DefaultGridRegistry",
+  "throwOnCapabilityNotPresent": true,
+  "cleanUpCycle": 5000,
+  "role": "hub",
+  "debug": false,
+  "browserTimeout": 0,
+  "timeout": 1800
+}
+
+ISSUES:
+--> Node registration throws error if I setup Hub without the hubconfig.json.
+ 
+Reference:
+https://www.guru99.com/introduction-to-selenium-grid.html
+https://medium.com/chaya-thilakumara/selenium-grid-chrome-browser-c2cb986e0f70
+https://www.youtube.com/watch?v=kAvzKA9wsbo
