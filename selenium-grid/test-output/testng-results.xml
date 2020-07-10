@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testng-results skipped="0" failed="0" ignored="0" total="2" passed="2">
+  <reporter-output>
+  </reporter-output>
+  <suite name="Default suite" duration-ms="19590" started-at="2020-07-03T00:54:17Z" finished-at="2020-07-03T00:54:37Z">
+    <groups>
+    </groups>
+    <test name="Default test" duration-ms="19590" started-at="2020-07-03T00:54:17Z" finished-at="2020-07-03T00:54:37Z">
+      <class name="actions.Node">
+        <test-method status="PASS" signature="simpleTest()[pri:0, instance:actions.Node@10db82ae]" name="simpleTest" duration-ms="5900" started-at="2020-07-03T06:24:17Z" finished-at="2020-07-03T06:24:23Z">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- simpleTest -->
+        <test-method status="PASS" signature="simpleTest2()[pri:0, instance:actions.Node@10db82ae]" name="simpleTest2" duration-ms="13648" started-at="2020-07-03T06:24:23Z" finished-at="2020-07-03T06:24:37Z">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- simpleTest2 -->
+      </class> <!-- actions.Node -->
+    </test> <!-- Default test -->
+  </suite> <!-- Default suite -->
+</testng-results>
